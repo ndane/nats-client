@@ -22,13 +22,18 @@ func main() {
 
 	conn, _ := nats.Connect(*server)
 
-	if len(*file) > 0 && len(*subject) > 0 {
-		data, err := ioutil.ReadFile(*file)
-		if err != nil {
-			panic(err)
-		}
-		if !json.Valid(data) {
-			panic(errors.New("Invalid JSON supplied"))
+	if len(*subject) > 0 {
+		var data []byte
+		if len(*file) > 0 {
+			data, err := ioutil.ReadFile(*file)
+			if err != nil {
+				panic(err)
+			}
+			if !json.Valid(data) {
+				panic(errors.New("Invalid JSON supplied"))
+			}
+		} else {
+			data = *new([]byte)
 		}
 
 		if *request == true {
@@ -38,7 +43,7 @@ func main() {
 				fmt.Println(string(response.Data))
 			}
 		} else {
-			if err = conn.Publish(*subject, data); err != nil {
+			if err := conn.Publish(*subject, data); err != nil {
 				panic(err)
 			}
 		}
