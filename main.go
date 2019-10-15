@@ -35,7 +35,7 @@ func main() {
 			if response, err := conn.Request(*subject, data, time.Duration(*timeout)); err != nil {
 				panic(err)
 			} else {
-				fmt.Println(response.Reply)
+				fmt.Println(string(response.Data))
 			}
 		} else {
 			if err = conn.Publish(*subject, data); err != nil {
