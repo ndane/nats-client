@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
+	"time"
 
 	"github.com/nats-io/nats.go"
 )
@@ -14,6 +16,8 @@ func main() {
 
 	file := flag.String("f", "", "Specify a JSON file to publish to a subject")
 	subject := flag.String("s", "", "Specify a subject to publish to")
+	request := flag.Bool("request", false, "Specify that this is a request and wait for a reply")
+	timeout := flag.Int("t", int(10*time.Second), "Specify a request timeout")
 	flag.Parse()
 
 	conn, _ := nats.Connect(*server)
@@ -26,9 +30,17 @@ func main() {
 		if !json.Valid(data) {
 			panic(errors.New("Invalid JSON supplied"))
 		}
-		err = conn.Publish(*subject, data)
-		if err != nil {
-			panic(err)
+
+		if *request == true {
+			if response, err := conn.Request(*subject, data, time.Duration(*timeout)); err != nil {
+				panic(err)
+			} else {
+				fmt.Println(response.Reply)
+			}
+		} else {
+			if err = conn.Publish(*subject, data); err != nil {
+				panic(err)
+			}
 		}
 	}
 
