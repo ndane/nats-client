@@ -24,8 +24,11 @@ func main() {
 
 	if len(*subject) > 0 {
 		var data []byte
+		var err error
+
 		if len(*file) > 0 {
-			data, err := ioutil.ReadFile(*file)
+			fmt.Println("Reading ", *file)
+			data, err = ioutil.ReadFile(*file)
 			if err != nil {
 				panic(err)
 			}
@@ -36,11 +39,13 @@ func main() {
 			data = *new([]byte)
 		}
 
+		fmt.Println("Sending ", string(data))
+
 		if *request == true {
 			if response, err := conn.Request(*subject, data, time.Duration(*timeout)); err != nil {
 				panic(err)
 			} else {
-				fmt.Println(string(response.Data))
+				fmt.Println("Reply: ", string(response.Data))
 			}
 		} else {
 			if err := conn.Publish(*subject, data); err != nil {
